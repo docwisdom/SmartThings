@@ -84,7 +84,7 @@ def temperatureHandler(evt) {
 		log.debug "Checking how long the temperature sensor has been reporting >= $tooHot"
 
 		// Don't send a continuous stream of text messages
-		def deltaMinutes = 0 // TODO: Ask for "retry interval" in prefs?
+		def deltaMinutes = 10 // TODO: Ask for "retry interval" in prefs?
 		def timeAgo = new Date(now() - (1000 * 60 * deltaMinutes).toLong())
 		def recentEvents = temperatureSensor1.eventsSince(timeAgo)
 		log.trace "Found ${recentEvents?.size() ?: 0} events in the last $deltaMinutes minutes"
