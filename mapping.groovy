@@ -18,7 +18,7 @@
  *  It will also allow you to set the thresholds for traffic and what colors to change the Hue to.
  *
  *
- * http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=6706%20hwy%209,%20felton,%20ca%2095018&to=400%20beach%20street,%20santa%20cruz,%20ca&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=1
+ *
  *
  *  if realTime > time
  */
