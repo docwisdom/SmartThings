@@ -1,7 +1,3 @@
-//http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=6706%20hwy%209,%20felton,%20ca%2095018&to=400%20beach%20street,%20santa%20cruz,%20ca&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=1
-
- //   if realTime > time
-
 /**
  *  Traffic Report
  *
@@ -16,6 +12,15 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ *
+ *  This SmartApp has the intention of notifying you of traffic conditions on your Hue bulbs and alerting you of departure time
+ *  based on that traffic. The app will request two locations, the expected time of arrival, and when to start polling for traffic.
+ *  It will also allow you to set the thresholds for traffic and what colors to change the Hue to.
+ *
+ *
+ * http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=6706%20hwy%209,%20felton,%20ca%2095018&to=400%20beach%20street,%20santa%20cruz,%20ca&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=1
+ *
+ *  if realTime > time
  */
 
 definition(
