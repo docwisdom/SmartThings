@@ -21,6 +21,7 @@
  *
  *
  *  if realTime > time
+ *  if (arrivalTime - realTime) >= now
  */
 
 definition(
@@ -116,6 +117,8 @@ def initialize() {
 def checkTrafficHandler(evt) {
 	log.debug "Event = $evt"
 
+    def today = new Date()
+    def todayFormatted = Date.parse( "M-d-yyyy", today)
     // Connect to mapquest API
 	def params = [
         uri: "http://www.mapquestapi.com",
@@ -133,7 +136,7 @@ def checkTrafficHandler(evt) {
             'useTraffic': 'true',
             'timeType': '3',
             'dateType': '0',
-            'date': '07/15/2014',
+            'date': '${todayFormatted}',
             'localTime': '${arrivalTime}',
             ]
 	]
@@ -145,4 +148,14 @@ def checkTrafficHandler(evt) {
       	}
         return result
     }
+}
+
+def leaveTime = seconds_to_mmss(realTime) -
+
+def seconds_to_hhmmss(sec) {
+    ((int)sec / 3600) + ':' + ((int)sec / 60) + ':' + sec % 60
+}
+def hhmmss_to_seconds(s) {
+    ints = s.tokenize(':').collect { Integer.parseInt(it) }
+    (ints[0] * 60 + ints[1]) * 60 + ints[2]
 }
