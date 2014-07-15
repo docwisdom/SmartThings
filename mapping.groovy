@@ -52,7 +52,7 @@ preferences {
 		input "checkTime", "time", title: "When?"
 	}
     //which hue bulbs to control?
-    section("Control these bulbs...") {
+    section("Control these bulbs:") {
 		input "hues", "capability.colorControl", title: "Which Hue Bulbs?", required:true, multiple:true
 	}
     //color for no traffic
@@ -66,8 +66,8 @@ preferences {
 		//input "lightLevel1", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
 	}
     //some traffic threshold in minutes
-	section("Some Traffic Adds This Many Minutes To Commute:") {
-		input "threshold1", "number", title: "Minutes?"
+	section("Traffic delay over this many minutes is considered Some Traffic:") {
+		input "threshold2", "number", title: "Minutes?"
 	}
     //color for some traffic
     section("Color For Some Traffic:"){
@@ -80,12 +80,12 @@ preferences {
 		//input "lightLevel2", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
 	}
     //bad traffic threshold in minutes
-	section("Bad Traffic Adds This Many Minutes To Commute:") {
-		input "threshold1", "number", title: "Minutes?"
+	section("Traffic delay over this many minutes is considered Bad Traffic:") {
+		input "threshold3", "number", title: "Minutes?"
 	}
     //color for bad traffic
     section("Color For Bad Traffic:"){
-		input "color1", "enum", title: "Hue Color?", required: false, multiple:false, options: [
+		input "color3", "enum", title: "Hue Color?", required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
 					["White":"White - Concentrate"],
 					["Daylight":"Daylight - Energize"],
@@ -111,6 +111,8 @@ def updated() {
 
 def initialize() {
 	// TODO: subscribe to attributes, devices, locations, etc.
+    def leaveTime = seconds_to_hhmmss(realTime)
+    log.debug "leaveTime = ${leaveTime}"
     //checkTrafficHandler()
 }
 
@@ -150,12 +152,9 @@ def checkTrafficHandler(evt) {
     }
 }
 
-def leaveTime = seconds_to_mmss(realTime) -
-
 def seconds_to_hhmmss(sec) {
-    ((int)sec / 3600) + ':' + ((int)sec / 60) + ':' + sec % 60
+    new GregorianCalendar(0, 0, 0, 0, 0, sec, 0).time.format('HH:mm:ss')
 }
 def hhmmss_to_seconds(s) {
-    ints = s.tokenize(':').collect { Integer.parseInt(it) }
-    (ints[0] * 60 + ints[1]) * 60 + ints[2]
+    (Date.parse('HH:mm:ss', '01:16:30').time - Date.parse('HH:mm:ss', '00:00:00').time) / 1000
 }
