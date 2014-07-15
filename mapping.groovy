@@ -113,16 +113,17 @@ def updated() {
 }
 
 def initialize() {
-	// TODO: subscribe to attributes, devices, locations, etc.
+    def todayFormatted = new Date().format( "M-d-yyyy")
+    log.debug "Today is = ${todayFormatted}"
+
     def leaveTime = seconds_to_hhmmss(realTime)
-    log.debug "leaveTime = ${leaveTime}"
+    log.debug "Leave Time is = ${leaveTime}"
     //checkTrafficHandler()
 }
 
 def checkTrafficHandler(evt) {
 	log.debug "Event = $evt"
-    def today = new Date()
-    def todayFormatted = Date.parse( "M-d-yyyy", today)
+
     // Connect to mapquest API
 	def params = [
         uri: "http://www.mapquestapi.com",
@@ -146,25 +147,26 @@ def checkTrafficHandler(evt) {
 	]
 
     httpPost(params) {response ->
-    	if(method != null) {
-        	def map = [:]
-            def descMap = parseDescriptionAsMap(returnedResponse)
-            def body = new String(descMap["body"])
-            def slurper = new JsonSlurper()
-            def result = slurper.parseText(body)
 
-            if (result.containsKey("realTime")){
-                def realTime = result.realTime
-            }
+        	//def map = [:]
+           // def descMap = parseDescriptionAsMap(returnedResponse)
+           // def body = new String(descMap["body"])
+           // def slurper = new JsonSlurper()
+           // def result = slurper.parseText(body)
+
+           // if (result.containsKey("realTime")){
+           //     def realTime = result.realTime
+           // }
 
 
-            def parseDescriptionAsMap(description) {
-            description.split(",").inject([:]) { map, param ->
-                def nameAndValue = param.split(":")
-                map += [(nameAndValue[0].trim()):nameAndValue[1].trim()]
-                }
-            }
-            //api(method, args, success)
+           // def parseDescriptionAsMap(description) {
+            //description.split(",").inject([:]) { map, param ->
+                //def nameAndValue = param.split(":")
+                //map += [(nameAndValue[0].trim()):nameAndValue[1].trim()]
+                //}
+            //}
+        if(method != null) {
+
       	}
         return result
     }
