@@ -113,16 +113,23 @@ def updated() {
 }
 
 def initialize() {
-    def todayFormatted = new Date().format( "M-d-yyyy")
-    log.debug "Today is = ${todayFormatted}"
-
-    def leaveTime = seconds_to_hhmmss(realTime)
-    log.debug "Leave Time is = ${leaveTime}"
-    //checkTrafficHandler()
+	def now = now()
+    if(now > endTime && now < startTime){
+        checkTrafficHandler()
+    }
+    else {
+     return true
 }
 
-def checkTrafficHandler(evt) {
-	log.debug "Event = $evt"
+
+    //def leaveTime = seconds_to_hhmmss(realTime)
+    //log.debug "Leave Time is = ${leaveTime}"
+
+}
+
+def checkTrafficHandler() {
+    def todayFormatted = new Date().format( "MM-dd-yyyy")
+    log.debug "Today is = ${todayFormatted}"
 
     // Connect to mapquest API
 	def params = [
