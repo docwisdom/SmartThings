@@ -54,11 +54,7 @@ preferences {
     section("Control these bulbs...") {
 		input "hues", "capability.colorControl", title: "Which Hue Bulbs?", required:true, multiple:true
 	}
-    //first threshold in minutes
-	section("When Commute Is Normal") {
-		input "threshold1", "number", title: "Minutes?"
-	}
-    //first color for threshold 1
+    //color for no traffic
 	section("Color For No Traffic:"){
 		input "color1", "enum", title: "Hue Color?", required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
@@ -68,11 +64,11 @@ preferences {
 					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
 		//input "lightLevel1", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
 	}
-    //second threshold in minutes
+    //some traffic threshold in minutes
 	section("Some Traffic Adds This Many Minutes To Commute:") {
 		input "threshold1", "number", title: "Minutes?"
 	}
-    //second color for threshold 2
+    //color for some traffic
     section("Color For Some Traffic:"){
 		input "color2", "enum", title: "Hue Color?", required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
@@ -82,11 +78,11 @@ preferences {
 					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
 		//input "lightLevel2", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
 	}
-    //second threshold in minutes
+    //bad traffic threshold in minutes
 	section("Bad Traffic Adds This Many Minutes To Commute:") {
 		input "threshold1", "number", title: "Minutes?"
 	}
-    //third color for threshold 3
+    //color for bad traffic
     section("Color For Bad Traffic:"){
 		input "color1", "enum", title: "Hue Color?", required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
