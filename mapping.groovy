@@ -13,16 +13,19 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *
- *  This SmartApp has the intention of notifying you of traffic conditions on your Hue bulbs and alerting you of departure time
- *  based on that traffic. The app will request two locations, the expected time of arrival, and when to start polling for traffic.
- *  It will also allow you to set the thresholds for traffic and what colors to change the Hue to.
+ *  --This SmartApp has the intention of notifying you of traffic conditions on your Hue bulbs and alerting you of departure time
+ *  --based on that traffic. The app will request two locations, the expected time of arrival, and when to start polling for traffic.
+ *  --It will also allow you to set the thresholds for traffic and what colors to change the Hue to.
  *
- *
+ *  --Special thanks to scottinpollock for code examples
  *
  *
  *  if realTime > time
  *  if (arrivalTime - realTime) >= now
  */
+
+import groovy.json.JsonSlurper
+
 
 definition(
     name: "Traffic Report",
@@ -118,7 +121,6 @@ def initialize() {
 
 def checkTrafficHandler(evt) {
 	log.debug "Event = $evt"
-
     def today = new Date()
     def todayFormatted = Date.parse( "M-d-yyyy", today)
     // Connect to mapquest API
@@ -144,9 +146,25 @@ def checkTrafficHandler(evt) {
 	]
 
     httpPost(params) {response ->
-
     	if(method != null) {
-        	api(method, args, success)
+        	def map = [:]
+            def descMap = parseDescriptionAsMap(returnedResponse)
+            def body = new String(descMap["body"])
+            def slurper = new JsonSlurper()
+            def result = slurper.parseText(body)
+
+            if (result.containsKey("realTime")){
+                def realTime = result.realTime
+            }
+
+
+            def parseDescriptionAsMap(description) {
+            description.split(",").inject([:]) { map, param ->
+                def nameAndValue = param.split(":")
+                map += [(nameAndValue[0].trim()):nameAndValue[1].trim()]
+                }
+            }
+            //api(method, args, success)
       	}
         return result
     }
@@ -155,6 +173,6 @@ def checkTrafficHandler(evt) {
 def seconds_to_hhmmss(sec) {
     new GregorianCalendar(0, 0, 0, 0, 0, sec, 0).time.format('HH:mm:ss')
 }
-def hhmmss_to_seconds(s) {
-    (Date.parse('HH:mm:ss', '01:16:30').time - Date.parse('HH:mm:ss', '00:00:00').time) / 1000
+def hhmmss_to_seconds(hhmmss) {
+    (Date.parse('HH:mm:ss', hhmmss).time - Date.parse('HH:mm:ss', '00:00:00').time) / 1000
 }
