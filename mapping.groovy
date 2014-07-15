@@ -17,6 +17,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+
 definition(
     name: "Traffic Report",
     namespace: "docwisdom",
@@ -36,13 +37,13 @@ preferences {
 	section("Arriving At:"){
 		input "to", "text", title: "Address?"
 	}
-	// //what time should I begin checking traffic?
-	section("Begin Checking At:"){
-		input "checkTime", "time", title: "When?"
-	}
     //what time do you need to arrive?
 	section("Expected Arrival Time:"){
 		input "arrivalTime", "time", title: "When?"
+	}
+    // //what time should I begin checking traffic?
+	section("Begin Checking At:"){
+		input "checkTime", "time", title: "When?"
 	}
     //which hue bulbs to control?
     section("Control these bulbs...") {
@@ -92,6 +93,7 @@ preferences {
 	}
 }
 
+
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 
@@ -107,22 +109,21 @@ def updated() {
 
 def initialize() {
 	// TODO: subscribe to attributes, devices, locations, etc.
-
+    //checkTrafficHandler()
 }
 
 def checkTrafficHandler(evt) {
 	log.debug "Event = $evt"
-    switch1.off()
 
-    // The CableLabs Web Service to receive room status
+    // Connect to mapquest API
 	def params = [
         uri: "http://www.mapquestapi.com",
         path: "/directions/v2/route?",
         headers: ['Cache-Control': 'no-cache', 'Content-Type': 'application/x-www-form-urlencoded'],
         body: [
         	'key': 'Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506',
-            'from': '',
-            'to': '',
+            'from': '${from}',
+            'to': '${to}',
 			'narrativeType': 'none',
             'ambiguities': 'ignore',
             'routeType': 'fastest',
