@@ -129,14 +129,27 @@ def checkTrafficHandler() {
     log.debug "Today is ${todayFormatted}"
 
     // Connect to mapquest API
-    httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${from}&to=${to}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=16:00") {response ->
-      	log.debug "${response}"
-        def actualTime = response.route.realTime.floatValue()
-        def expectedTime = response.route.time.floatValue()
-      return result
+    try{
+        httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=felton,ca&to=santa%20cruz,ca&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=07/15/2014&localTime=17:00") {resp ->
+        if (resp.data) {
+            def actualTime = resp.data.route.realTime.floatValue()
+            def expectedTime = resp.data.route.time.floatValue()
+            log.debug "${actualTime} and ${expectedTime}"
+            }
+            if(resp.status == 200) {
+            log.debug "poll results returned"
+        }
+            else {
+            log.error "polling children & got http status ${resp.status}"
+        }
     }
-}
+    } catch(Exception e)
+    {
+      log.debug "___exception polling children: " + e
+        debugEvent ("${e}", true)
+    }
 
+}
 /**
 def seconds_to_hhmmss(sec) {
     new GregorianCalendar(0, 0, 0, 0, 0, sec, 0).time.format('HH:mm:ss')
