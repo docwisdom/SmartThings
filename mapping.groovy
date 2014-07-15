@@ -114,7 +114,7 @@ def updated() {
 
 def initialize() {
 	def now = now()
-    if(now > endTime && now < startTime){
+    if(now > arrivalTime && now < checkTime){
         checkTrafficHandler()
     }
     else {
