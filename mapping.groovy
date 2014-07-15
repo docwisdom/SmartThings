@@ -131,7 +131,10 @@ def checkTrafficHandler(evt) {
             'unit': 'm',
             'outFormat': 'json',
             'useTraffic': 'true',
-            'timeType': '1',
+            'timeType': '3',
+            'dateType': '0',
+            'date': '07/15/2014',
+            'localTime': '${arrivalTime}',
             ]
 	]
 
