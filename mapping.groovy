@@ -23,8 +23,7 @@
  *  if realTime > time
  *  if (arrivalTime - realTime) >= now
  */
-
-import groovy.json.JsonSlurper
+import groovy.time.*
 
 
 definition(
@@ -54,12 +53,13 @@ preferences {
 	section("Begin Checking At:"){
 		input "checkTime", "time", title: "When?"
 	}
+    /**
     //which hue bulbs to control?
     section("Control these bulbs:") {
 		input "hues", "capability.colorControl", title: "Which Hue Bulbs?", required:true, multiple:true
 	}
     //color for no traffic
-	section("Color For No Traffic:"){
+	//section("Color For No Traffic:"){
 		input "color1", "enum", title: "Hue Color?", required: false, multiple:false, options: [
 					["Soft White":"Soft White - Default"],
 					["White":"White - Concentrate"],
@@ -96,6 +96,7 @@ preferences {
 					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
 		//input "lightLevel3", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
 	}
+    */
 }
 
 
@@ -113,75 +114,34 @@ def updated() {
 }
 
 def initialize() {
-	def now = now()
-    if(now > arrivalTime && now < checkTime){
+	def tz = TimeZone.getTimeZone('PST')
+	def formattedNow = new Date().format("HH:mm:ss", tz)
+    log.debug "${formattedNow}"
+
+	if(now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
         checkTrafficHandler()
     }
-    else {
-     return true
-}
-
-
-    //def leaveTime = seconds_to_hhmmss(realTime)
-    //log.debug "Leave Time is = ${leaveTime}"
 
 }
 
 def checkTrafficHandler() {
-    def todayFormatted = new Date().format( "MM-dd-yyyy")
-    log.debug "Today is = ${todayFormatted}"
+    def todayFormatted = new Date().format("MM/dd/yyyy")
+    log.debug "Today is ${todayFormatted}"
 
     // Connect to mapquest API
-	def params = [
-        uri: "http://www.mapquestapi.com",
-        path: "/directions/v2/route?",
-        headers: ['Cache-Control': 'no-cache', 'Content-Type': 'application/x-www-form-urlencoded'],
-        body: [
-        	'key': 'Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506',
-            'from': '${from}',
-            'to': '${to}',
-			'narrativeType': 'none',
-            'ambiguities': 'ignore',
-            'routeType': 'fastest',
-            'unit': 'm',
-            'outFormat': 'json',
-            'useTraffic': 'true',
-            'timeType': '3',
-            'dateType': '0',
-            'date': '${todayFormatted}',
-            'localTime': '${arrivalTime}',
-            ]
-	]
-
-    httpPost(params) {response ->
-
-        	//def map = [:]
-           // def descMap = parseDescriptionAsMap(returnedResponse)
-           // def body = new String(descMap["body"])
-           // def slurper = new JsonSlurper()
-           // def result = slurper.parseText(body)
-
-           // if (result.containsKey("realTime")){
-           //     def realTime = result.realTime
-           // }
-
-
-           // def parseDescriptionAsMap(description) {
-            //description.split(",").inject([:]) { map, param ->
-                //def nameAndValue = param.split(":")
-                //map += [(nameAndValue[0].trim()):nameAndValue[1].trim()]
-                //}
-            //}
-        if(method != null) {
-
-      	}
-        return result
+    httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${from}&to=${to}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=16:00") {response ->
+      	log.debug "${response}"
+        def actualTime = response.route.realTime.floatValue()
+        def expectedTime = response.route.time.floatValue()
+      return result
     }
 }
 
+/**
 def seconds_to_hhmmss(sec) {
     new GregorianCalendar(0, 0, 0, 0, 0, sec, 0).time.format('HH:mm:ss')
 }
 def hhmmss_to_seconds(hhmmss) {
     (Date.parse('HH:mm:ss', hhmmss).time - Date.parse('HH:mm:ss', '00:00:00').time) / 1000
 }
+*/
