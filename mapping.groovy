@@ -120,27 +120,25 @@ def updated() {
 def initialize() {
 	def tz = TimeZone.getTimeZone('PST')
 	def formattedNow = new Date().format("HH:mm:ss", tz)
-    log.debug "The time right now is ${formattedNow}"
     def todayFormatted = new Date().format("MM/dd/yyyy")
-    log.debug "Todays date is ${todayFormatted}"
-    log.debug "Unformatted arrival time is ${arrivalTime}"
     def arrivalTimeFormatted = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSSX", arrivalTime).format('HH:mm', tz)
-    log.debug "Expected Arrival Time is ${arrivalTimeFormatted}"
     def fromFormatted = URLEncoder.encode(from, "UTF-8")
     def toFormatted = URLEncoder.encode(to, "UTF-8");
 
+    //log.debug "The time right now is ${formattedNow}"
+    //log.debug "Todays date is ${todayFormatted}"
+    //log.debug "Unformatted arrival time is ${arrivalTime}"
+    //log.debug "Expected Arrival Time is ${arrivalTimeFormatted}"
+
 	if(now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
-        checkTrafficHandler(fromFormatted, toFormatted, todayFormatted, arrivalTimeFormatted)
+        checkTrafficHandler()
     }
 
 }
 
-def checkTrafficHandler(fromFormatted, toFormatted, todayFormatted, arrivalTimeFormatted) {
-
-
+def checkTrafficHandler() {
     log.debug "formatted variables are ${fromFormatted} ${toFormatted} ${todayFormatted} ${arrivalTimeFormatted}"
 
-    log.debug "${encURL}"
     // Connect to mapquest API
     try{
         httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${fromFormatted}&to=${toFormatted}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=${arrivalTimeFormatted}") {resp ->
