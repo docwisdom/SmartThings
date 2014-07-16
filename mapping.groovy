@@ -39,11 +39,11 @@ definition(
 preferences {
 	//what is the departure location?
 	section("Departing From:"){
-		input "from", "text", title: "Address?"
+		input "departFrom", "text", title: "Address?"
 	}
     //what is the destination location?
 	section("Arriving At:"){
-		input "to", "text", title: "Address?"
+		input "arriveAt", "text", title: "Address?"
 	}
     //what time do you need to arrive?
 	section("Expected Arrival Time:"){
@@ -124,27 +124,29 @@ def initialize() {
 	def formattedNow = new Date().format("HH:mm:ss", tz)
     def todayFormatted = new Date().format("MM/dd/yyyy")
     def arrivalTimeFormatted = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSSX", arrivalTime).format('HH:mm', tz)
-    def fromFormatted = URLEncoder.encode(from, "UTF-8")
-    def toFormatted = URLEncoder.encode(to, "UTF-8");
+    def departFromFormatted = URLEncoder.encode(departFrom, "UTF-8")
+    def arriveToFormatted = URLEncoder.encode(arriveAt, "UTF-8");
 
-    //log.debug "The time right now is ${formattedNow}"
-    //log.debug "Todays date is ${todayFormatted}"
-    //log.debug "Unformatted arrival time is ${arrivalTime}"
-    //log.debug "Expected Arrival Time is ${arrivalTimeFormatted}"
+    log.debug "The time right now is ${formattedNow}"
+    log.debug "Todays date is ${todayFormatted}"
+    log.debug "Unformatted arrival time is ${arrivalTime}"
+    log.debug "Expected Arrival Time is ${arrivalTimeFormatted}"
+    log.debug "The departure is ${departFromFormatted}"
+    log.debug "The arrival is ${arriveToFormatted}"
 
 	if(now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
-        checkTrafficHandler()
+        checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, arrivalTimeFormatted)
     }
 
 }
 
 //handles the traffic API call from Mapquest and calcualtes traffic time
-def checkTrafficHandler() {
-    log.debug "formatted variables are ${fromFormatted} ${toFormatted} ${todayFormatted} ${arrivalTimeFormatted}"
+def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, arrivalTimeFormatted) {
+    log.debug "formatted variables are ${departFromFormatted} ${arriveToFormatted} ${todayFormatted} ${arrivalTimeFormatted}"
 
     // Connect to mapquest API
     try{
-        httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${fromFormatted}&to=${toFormatted}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=${arrivalTimeFormatted}") {resp ->
+        httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${departFromFormatted}&to=${arriveToFormatted}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=${arrivalTimeFormatted}") {resp ->
         if (resp.data) {
         	//debugEvent ("${resp.data}", true)
             def actualTime = resp.data.route.realTime.floatValue()
