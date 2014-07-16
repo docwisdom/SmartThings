@@ -145,13 +145,14 @@ def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, 
     log.debug "formatted variables are ${departFromFormatted} ${arriveToFormatted} ${todayFormatted} ${arrivalTimeFormatted}"
 
     // Connect to mapquest API
-    try{
+    //try{
         httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${departFromFormatted}&to=${arriveToFormatted}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=${arrivalTimeFormatted}") {resp ->
         if (resp.data) {
         	//debugEvent ("${resp.data}", true)
             def actualTime = resp.data.route.realTime.floatValue()
             def expectedTime = resp.data.route.time.floatValue()
             log.debug "Actual time ${actualTime} and expected time ${expectedTime}"
+            makeTheLightsDo(actualTime, expectedTime)
             }
             if(resp.status == 200) {
             log.debug "poll results returned"
@@ -160,28 +161,29 @@ def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, 
             log.error "polling children & got http status ${resp.status}"
         }
     }
+    /*
     } catch(Exception e)
     {
       log.debug "___exception polling children: " + e
-        debugEvent ("${e}", true)
-    }
+        //debugEvent ("${e}", true)
+    }*/
+}
 
+def makeTheLightsDo(actualTime, expectedTime) {
 
-    /*
  	//if the actual travel time exceeds the expected time plus bad traffic threshold
 	def threshold3Seconds = threshold3 * 60
     log.debug threshold3Seconds
  	if (actualTime > (expectedTime + (threshold3 * 60))) {
-    	debug.log "Do RED!"
+    	log.debug "Do RED!"
     }
     //if the actual travel time exceeds the expected time plus some traffic threshold
     else if (actualTime > (expectedTime + (threshold2 * 60))) {
-    	debug.log "Do YELLOW!"
+    	log.debug "Do YELLOW!"
     }
     else {
-    	debug.log "Do GREEN!"
+    	log.debug "Do GREEN!"
     }
-*/
 }
 
 def seconds_to_hhmmss(sec) {
