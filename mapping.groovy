@@ -103,13 +103,14 @@ preferences {
     */
 }
 
-
+//init upon install
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 
 	initialize()
 }
 
+//reinit upon update
 def updated() {
 	log.debug "Updated with settings: ${settings}"
 
@@ -117,6 +118,7 @@ def updated() {
 	initialize()
 }
 
+//main script upon init
 def initialize() {
 	def tz = TimeZone.getTimeZone('PST')
 	def formattedNow = new Date().format("HH:mm:ss", tz)
@@ -136,6 +138,7 @@ def initialize() {
 
 }
 
+//handles the traffic API call from Mapquest and calcualtes traffic time
 def checkTrafficHandler() {
     log.debug "formatted variables are ${fromFormatted} ${toFormatted} ${todayFormatted} ${arrivalTimeFormatted}"
 
