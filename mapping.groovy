@@ -124,8 +124,8 @@ def initialize() {
 	def formattedNow = new Date().format("HH:mm:ss", tz)
     def todayFormatted = new Date().format("MM/dd/yyyy")
     def arrivalTimeFormatted = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSSX", arrivalTime).format('HH:mm', tz)
-    def departFromFormatted = URLEncoder.encode(departFrom, "UTF-8")
-    def arriveToFormatted = URLEncoder.encode(arriveAt, "UTF-8");
+    def departFromFormatted = URLEncoder.encode(departFrom.toString(), "UTF-8")
+    def arriveToFormatted = URLEncoder.encode(arriveAt.toString(), "UTF-8");
 
     log.debug "The time right now is ${formattedNow}"
     log.debug "Todays date is ${todayFormatted}"
@@ -165,9 +165,12 @@ def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, 
       log.debug "___exception polling children: " + e
         debugEvent ("${e}", true)
     }
-    //debug.log "${threshold3}"
- 	/*if the actual travel time exceeds the expected time plus bad traffic threshold
 
+
+    /*
+ 	//if the actual travel time exceeds the expected time plus bad traffic threshold
+	def threshold3Seconds = threshold3 * 60
+    log.debug threshold3Seconds
  	if (actualTime > (expectedTime + (threshold3 * 60))) {
     	debug.log "Do RED!"
     }
@@ -177,7 +180,8 @@ def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, 
     }
     else {
     	debug.log "Do GREEN!"
-    }*/
+    }
+*/
 }
 
 def seconds_to_hhmmss(sec) {
