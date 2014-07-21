@@ -120,6 +120,26 @@ def updated() {
 
 //main script upon init
 def initialize() {
+    checkTime()
+}
+
+def checkTime(){
+	if (now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
+        runIn(60, scheduledRun)
+    }
+    else {
+    	runIn (5*60, checkTime)
+    }
+}
+
+def scheduledRun() {
+	log.debug "Running"
+	checkTrafficHandler()
+}
+
+//handles the traffic API call from Mapquest and calcualtes traffic time
+def checkTrafficHandler() {
+
 	def tz = TimeZone.getTimeZone('PST')
 	def formattedNow = new Date().format("HH:mm:ss", tz)
     def todayFormatted = new Date().format("MM/dd/yyyy")
@@ -129,23 +149,12 @@ def initialize() {
 
     log.debug "The time right now is ${formattedNow}"
     log.debug "Todays date is ${todayFormatted}"
-    log.debug "Unformatted arrival time is ${arrivalTime}"
-    log.debug "Expected Arrival Time is ${arrivalTimeFormatted}"
-    log.debug "The departure is ${departFromFormatted}"
-    log.debug "The arrival is ${arriveToFormatted}"
+    log.debug "Requested Arrival Time is ${arrivalTimeFormatted}"
+    log.debug "The departure location is ${departFromFormatted}"
+    log.debug "The arrival location is ${arriveToFormatted}"
 
-	if(now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
-        checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, arrivalTimeFormatted)
-    }
-
-}
-
-//handles the traffic API call from Mapquest and calcualtes traffic time
-def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, arrivalTimeFormatted) {
     log.debug "formatted variables are ${departFromFormatted} ${arriveToFormatted} ${todayFormatted} ${arrivalTimeFormatted}"
 
-    // Connect to mapquest API
-    //try{
         httpGet("http://www.mapquestapi.com/directions/v2/route?key=Fmjtd%7Cluur20u82u%2Can%3Do5-9ay506&from=${departFromFormatted}&to=${arriveToFormatted}&narrativeType=none&ambiguities=ignore&routeType=fastest&unit=m&outFormat=json&useTraffic=true&timeType=3&dateType=0&date=${todayFormatted}&localTime=${arrivalTimeFormatted}") {resp ->
         if (resp.data) {
         	//debugEvent ("${resp.data}", true)
@@ -153,27 +162,20 @@ def checkTrafficHandler(departFromFormatted, arriveToFormatted, todayFormatted, 
             def expectedTime = resp.data.route.time.floatValue()
             log.debug "Actual time ${actualTime} and expected time ${expectedTime}"
             makeTheLightsDo(actualTime, expectedTime)
-            }
-            if(resp.status == 200) {
-            log.debug "poll results returned"
         }
-            else {
+            if(resp.status == 200) {
+            	log.debug "poll results returned"
+           	}
+         else {
             log.error "polling children & got http status ${resp.status}"
         }
     }
-    /*
-    } catch(Exception e)
-    {
-      log.debug "___exception polling children: " + e
-        //debugEvent ("${e}", true)
-    }*/
 }
 
 def makeTheLightsDo(actualTime, expectedTime) {
 
  	//if the actual travel time exceeds the expected time plus bad traffic threshold
 	def threshold3Seconds = threshold3 * 60
-    log.debug threshold3Seconds
  	if (actualTime > (expectedTime + (threshold3 * 60))) {
     	log.debug "Do RED!"
     }
@@ -181,9 +183,26 @@ def makeTheLightsDo(actualTime, expectedTime) {
     else if (actualTime > (expectedTime + (threshold2 * 60))) {
     	log.debug "Do YELLOW!"
     }
-    else {
+    //if there is no traffic
+    else if (actualTime <= (expectedTime + (threshold2 * 60)) && actualTime >= 0) {
     	log.debug "Do GREEN!"
     }
+    else if (actualTIme < 0) {
+    	log.debug "Its past time to leave!"
+    }
+    else {
+    	log.debug "Something Broke"
+    }
+
+checkTime()
+}
+
+//blink the lights when its time to leave
+def checkForBlink() {
+ if ((hhmmss_to_seconds(arrivalTimeFormatted) - actualTime) > hhmmss_to_seconds(now())) {
+ 	log.debug "woah thats some math!"
+ }
+
 }
 
 def seconds_to_hhmmss(sec) {
