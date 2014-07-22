@@ -46,96 +46,52 @@ preferences {
 		input "arriveAt", "text", title: "Address?"
 	}
     //what time do you need to arrive?
-	section("Planned Arrival Time:"){
+	section("Expected Arrival Time:"){
 		input "arrivalTime", "time", title: "When?"
 	}
     // //what time should I begin checking traffic?
-	section("Begin Checking For Traffic At:"){
+	section("Begin Checking At:"){
 		input "checkTime", "time", title: "When?"
 	}
-    /**
-    //which hue bulbs to control?
-    section("Control these bulbs:") {
-		input "hues", "capability.colorControl", title: "Which Hue Bulbs?", required:true, multiple:true
-	}
-    //color for no traffic
-	//section("Color For No Traffic:"){
-		input "color1", "enum", title: "Hue Color?", required: false, multiple:false, options: [
-					["Soft White":"Soft White - Default"],
-					["White":"White - Concentrate"],
-					["Daylight":"Daylight - Energize"],
-					["Warm White":"Warm White - Relax"],
-					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
-		//input "lightLevel1", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
-	}
-    */
     //some traffic threshold in minutes
 	section("Traffic delay over this many minutes is considered Some Traffic:") {
 		input "threshold2", "number", title: "Minutes?"
 	}
-    /**
-    //color for some traffic
-    section("Color For Some Traffic:"){
-		input "color2", "enum", title: "Hue Color?", required: false, multiple:false, options: [
-					["Soft White":"Soft White - Default"],
-					["White":"White - Concentrate"],
-					["Daylight":"Daylight - Energize"],
-					["Warm White":"Warm White - Relax"],
-					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
-		//input "lightLevel2", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
-	}
-    */
     //bad traffic threshold in minutes
 	section("Traffic delay over this many minutes is considered Bad Traffic:") {
 		input "threshold3", "number", title: "Minutes?"
 	}
-    /*
-    //color for bad traffic
-    section("Color For Bad Traffic:"){
-		input "color3", "enum", title: "Hue Color?", required: false, multiple:false, options: [
-					["Soft White":"Soft White - Default"],
-					["White":"White - Concentrate"],
-					["Daylight":"Daylight - Energize"],
-					["Warm White":"Warm White - Relax"],
-					"Red","Green","Blue","Yellow","Orange","Purple","Pink"]
-		//input "lightLevel3", "enum", title: "Light Level?", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
-	}
-    */
 }
 
-//init upon install
+//schedule upon install
 def installed() {
 	log.debug "Installed with settings: ${settings}"
-
 	initialize()
 }
 
-//reinit upon update
+//reschedule upon update
 def updated() {
 	log.debug "Updated with settings: ${settings}"
-
 	unsubscribe()
 	initialize()
 }
 
-//main script upon init
 def initialize() {
-    checkTime()
+	def checkHour = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSSX", checkTime).format('H', TimeZone.getTimeZone('PST'))
+    def checkMinute = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSSX", checkTime).format('m', TimeZone.getTimeZone('PST'))
+    log.debug checkHour
+    log.debug checkMinute
+	schedule("0 ${checkMinute} ${checkHour} * * ?", "checkTimeHandler")
 }
 
-def checkTime(){
+//check the time is between the desired check points
+def checkTimeHandler(){
 	if (now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
-        runIn(60, scheduledRun)
-    }
-    else {
-    	runIn (5*60, checkTime)
+    	log.debug "Its time"
+        runIn(60, checkTrafficHandler)
     }
 }
 
-def scheduledRun() {
-	log.debug "Running"
-	checkTrafficHandler()
-}
 
 //handles the traffic API call from Mapquest and calcualtes traffic time
 def checkTrafficHandler() {
@@ -175,7 +131,7 @@ def checkTrafficHandler() {
 def makeTheLightsDo(actualTime, expectedTime) {
 
  	//if the actual travel time exceeds the expected time plus bad traffic threshold
-	def threshold3Seconds = threshold3 * 60
+
  	if (actualTime > (expectedTime + (threshold3 * 60))) {
     	log.debug "Do RED!"
     }
@@ -187,20 +143,20 @@ def makeTheLightsDo(actualTime, expectedTime) {
     else if (actualTime <= (expectedTime + (threshold2 * 60)) && actualTime >= 0) {
     	log.debug "Do GREEN!"
     }
-    else if (actualTIme < 0) {
+    else if (actualTime < 0) {
     	log.debug "Its past time to leave!"
     }
     else {
     	log.debug "Something Broke"
     }
 
-checkTime()
+checkTimeHandler()
 }
-//TODO:
+
 //blink the lights when its time to leave
 def checkForBlink() {
  if ((hhmmss_to_seconds(arrivalTimeFormatted) - actualTime) > hhmmss_to_seconds(now())) {
- 	log.debug "woah thats some math! who knows if it will work"
+ 	log.debug "woah thats some math!"
  }
 
 }
@@ -211,4 +167,3 @@ def seconds_to_hhmmss(sec) {
 def hhmmss_to_seconds(hhmmss) {
     (Date.parse('HH:mm:ss', hhmmss).time - Date.parse('HH:mm:ss', '00:00:00').time) / 1000
 }
-
