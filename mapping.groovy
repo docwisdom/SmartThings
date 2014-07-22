@@ -54,11 +54,11 @@ preferences {
 		input "checkTime", "time", title: "When?"
 	}
     //some traffic threshold in minutes
-	section("Traffic delay over this many minutes is considered Some Traffic:") {
+	section("Trigger MODERATE TRAFFIC if commute increases this many minutes:") {
 		input "threshold2", "number", title: "Minutes?"
 	}
     //bad traffic threshold in minutes
-	section("Traffic delay over this many minutes is considered Bad Traffic:") {
+	section("Trigger BAD TRAFFIC if commute increases by this many minutes:") {
 		input "threshold3", "number", title: "Minutes?"
 	}
 }
@@ -89,6 +89,10 @@ def checkTimeHandler(){
 	if (now() > timeToday(checkTime).time && now() < timeToday(arrivalTime).time){
     	log.debug "Its time"
         runIn(60, checkTrafficHandler)
+    }
+    else {
+    	log.debug "Its not time anymore"
+        initialize()
     }
 }
 
@@ -133,18 +137,18 @@ def makeTheLightsDo(actualTime, expectedTime) {
  	//if the actual travel time exceeds the expected time plus bad traffic threshold
 
  	if (actualTime > (expectedTime + (threshold3 * 60))) {
-    	log.debug "Do RED!"
+    	log.info "Hues to RED!"
     }
     //if the actual travel time exceeds the expected time plus some traffic threshold
     else if (actualTime > (expectedTime + (threshold2 * 60))) {
-    	log.debug "Do YELLOW!"
+    	log.info "Hues to YELLOW!"
     }
     //if there is no traffic
     else if (actualTime <= (expectedTime + (threshold2 * 60)) && actualTime >= 0) {
-    	log.debug "Do GREEN!"
+    	log.info "Hues to GREEN!"
     }
     else if (actualTime < 0) {
-    	log.debug "Its past time to leave!"
+    	log.info "Its past time to leave!"
     }
     else {
     	log.debug "Something Broke"
