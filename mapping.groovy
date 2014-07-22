@@ -46,11 +46,11 @@ preferences {
 		input "arriveAt", "text", title: "Address?"
 	}
     //what time do you need to arrive?
-	section("Expected Arrival Time:"){
+	section("Planned Arrival Time:"){
 		input "arrivalTime", "time", title: "When?"
 	}
     // //what time should I begin checking traffic?
-	section("Begin Checking At:"){
+	section("Begin Checking For Traffic At:"){
 		input "checkTime", "time", title: "When?"
 	}
     /**
@@ -196,11 +196,11 @@ def makeTheLightsDo(actualTime, expectedTime) {
 
 checkTime()
 }
-
+//TODO:
 //blink the lights when its time to leave
 def checkForBlink() {
  if ((hhmmss_to_seconds(arrivalTimeFormatted) - actualTime) > hhmmss_to_seconds(now())) {
- 	log.debug "woah thats some math!"
+ 	log.debug "woah thats some math! who knows if it will work"
  }
 
 }
