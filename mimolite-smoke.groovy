@@ -13,7 +13,6 @@ metadata {
 		capability "Refresh"
 		capability "Switch"
 		capability "Contact Sensor"
-        capability "Smoke Detector"
 
 	}
 
