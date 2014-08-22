@@ -14,10 +14,10 @@
  *
  */
 definition(
-    name: "Its too humid!",
+    name: "Humidity Alert!",
     namespace: "docwisdom",
     author: "Brian Critchlow",
-    description: "Notify me when the humidity rises above the given threshold",
+    description: "Notify me when the humidity rises above or falls below the given threshold. It will turn on a switch when it rises above the first threshold and off when it falls below the second threshold.",
     category: "Convenience",
     iconUrl: "https://graph.api.smartthings.com/api/devices/icons/st.Weather.weather9-icn",
     iconX2Url: "https://graph.api.smartthings.com/api/devices/icons/st.Weather.weather9-icn?displaySize=2x"
@@ -31,11 +31,14 @@ preferences {
 	section("When the humidity rises above:") {
 		input "humidity1", "number", title: "Percentage ?"
 	}
+    section("When the humidity falls below:") {
+		input "humidity2", "number", title: "Percentage ?"
+	}
     section( "Notifications" ) {
         input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
         input "phone1", "phone", title: "Send a Text Message?", required: false
     }
-	section("Turn on a switch:") {
+	section("Control this switch:") {
 		input "switch1", "capability.switch", required: false
 	}
 }
@@ -50,30 +53,47 @@ def updated() {
 }
 
 def humidityHandler(evt) {
-	log.trace "humidity: $evt.value"
-    log.trace "set point: $humidity1"
+	log.trace "humidity: ${evt.value}"
+    log.trace "set point: ${humidity1}"
 
 	def currentHumidity = Double.parseDouble(evt.value.replace("%", ""))
-	def tooHumid = humidity1
+	def tooHumid = humidity1 
+    def notHumidEnough = humidity2
 	def mySwitch = settings.switch1
-
+	def deltaMinutes = 10 
+    
+    def timeAgo = new Date(now() - (1000 * 60 * deltaMinutes).toLong())
+	def recentEvents = humiditySensor1.eventsSince(timeAgo)
+	log.trace "Found ${recentEvents?.size() ?: 0} events in the last ${deltaMinutes} minutes"
+	def alreadySentSms = recentEvents.count { Double.parseDouble(it.value.replace("%", "")) >= tooHumid } > 1 || recentEvents.count { Double.parseDouble(it.value.replace("%", "")) <= notHumidEnough } > 1
+    
 	if (currentHumidity >= tooHumid) {
-		log.debug "Checking how long the humidity sensor has been reporting >= $tooHumid"
+		log.debug "Checking how long the humidity sensor has been reporting >= ${tooHumid}"
 
 		// Don't send a continuous stream of text messages
-		def deltaMinutes = 10
-		def timeAgo = new Date(now() - (1000 * 60 * deltaMinutes).toLong())
-		def recentEvents = humiditySensor1.eventsSince(timeAgo)
-		log.trace "Found ${recentEvents?.size() ?: 0} events in the last $deltaMinutes minutes"
-		def alreadySentSms = recentEvents.count { Double.parseDouble(it.value.replace("%", "")) >= tooHumid } > 1
+		
+
 
 		if (alreadySentSms) {
-			log.debug "Notification already sent within the last $deltaMinutes minutes"
-
+			log.debug "Notification already sent within the last ${deltaMinutes} minutes"
+			
 		} else {
-			log.debug "Humidity Rose Above $tooHumid:  sending SMS to $phone1 and activating $mySwitch"
+			log.debug "Humidity Rose Above ${tooHumid}:  sending SMS to $phone1 and activating ${mySwitch}"
 			send("${humiditySensor1.label} sensed high humidity level of ${evt.value}")
 			switch1?.on()
+		}
+	}
+
+    if (currentHumidity <= notHumidEnough) {
+		log.debug "Checking how long the humidity sensor has been reporting <= ${notHumidEnough}"
+
+		if (alreadySentSms) {
+			log.debug "Notification already sent within the last ${deltaMinutes} minutes"
+			
+		} else {
+			log.debug "Humidity Fell Below ${notHumidEnough}:  sending SMS to $phone1 and activating ${mySwitch}"
+			send("${humiditySensor1.label} sensed high humidity level of ${evt.value}")
+			switch1?.off()
 		}
 	}
 }
